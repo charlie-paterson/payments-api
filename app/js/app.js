@@ -3,19 +3,27 @@ const MealMate = {
   shopping: JSON.parse(localStorage.getItem("mealmate-shopping")) || [],
 
   saveMeals() {
-    localStorage.setItem("mealmate-meals", JSON.stringify(this.meals));
+    localStorage.setItem(
+      "mealmate-meals",
+      JSON.stringify(this.meals)
+    );
   },
 
   saveShopping() {
-    localStorage.setItem("mealmate-shopping", JSON.stringify(this.shopping));
+    localStorage.setItem(
+      "mealmate-shopping",
+      JSON.stringify(this.shopping)
+    );
   },
 
   addShoppingItem(name) {
-    if (!name.trim()) return;
+    const cleanName = name.trim();
+
+    if (!cleanName) return;
 
     this.shopping.push({
       id: Date.now(),
-      name: name.trim(),
+      name: cleanName,
       completed: false
     });
 
@@ -24,56 +32,81 @@ const MealMate = {
   },
 
   toggleShoppingItem(id) {
-    const item = this.shopping.find(item => item.id === id);
+    const item = this.shopping.find(
+      item => item.id === id
+    );
 
-    if (item) {
-      item.completed = !item.completed;
-      this.saveShopping();
-      this.renderShopping();
-    }
+    if (!item) return;
+
+    item.completed = !item.completed;
+
+    this.saveShopping();
+    this.renderShopping();
   },
 
   removeShoppingItem(id) {
-    this.shopping = this.shopping.filter(item => item.id !== id);
+    this.shopping = this.shopping.filter(
+      item => item.id !== id
+    );
 
     this.saveShopping();
     this.renderShopping();
   },
 
   renderShopping() {
-    const list = document.querySelector("#shopping-list");
+    const lists = [
+      document.querySelector("#shopping-list"),
+      document.querySelector("#shopping-list-full")
+    ].filter(Boolean);
 
-    if (!list) return;
+    lists.forEach(list => {
+      list.innerHTML = "";
 
-    list.innerHTML = "";
+      if (this.shopping.length === 0) {
+        list.innerHTML = `
+          <p class="muted">
+            Your shopping list is empty.
+          </p>
+        `;
 
-    this.shopping.forEach(item => {
-      const row = document.createElement("div");
+        return;
+      }
 
-      row.className = "shopping-item";
+      this.shopping.forEach(item => {
+        const row = document.createElement("div");
 
-      row.innerHTML = `
-        <label>
-          <input
-            type="checkbox"
-            ${item.completed ? "checked" : ""}
-            onchange="MealMate.toggleShoppingItem(${item.id})"
-          >
+        row.className = "shopping-item";
 
-          <span class="${item.completed ? "completed" : ""}">
-            ${item.name}
-          </span>
-        </label>
+        row.innerHTML = `
+          <label>
+            <input
+              type="checkbox"
+              ${item.completed ? "checked" : ""}
+            >
 
-        <button
-          type="button"
-          onclick="MealMate.removeShoppingItem(${item.id})"
-        >
-          ×
-        </button>
-      `;
+            <span class="${item.completed ? "completed" : ""}">
+              ${this.escapeHtml(item.name)}
+            </span>
+          </label>
 
-      list.appendChild(row);
+          <button type="button" aria-label="Remove item">
+            ×
+          </button>
+        `;
+
+        const checkbox = row.querySelector("input");
+        const removeButton = row.querySelector("button");
+
+        checkbox.addEventListener("change", () => {
+          this.toggleShoppingItem(item.id);
+        });
+
+        removeButton.addEventListener("click", () => {
+          this.removeShoppingItem(item.id);
+        });
+
+        list.appendChild(row);
+      });
     });
 
     this.updateShoppingProgress();
@@ -90,20 +123,154 @@ const MealMate = {
       ? Math.round((completed / total) * 100)
       : 0;
 
-    const progress = document.querySelector("#shopping-progress");
-    const progressText = document.querySelector("#shopping-progress-text");
+    const bars = [
+      document.querySelector("#shopping-progress"),
+      document.querySelector("#shopping-progress-full")
+    ].filter(Boolean);
 
-    if (progress) {
-      progress.style.width = `${percentage}%`;
-    }
+    const texts = [
+      document.querySelector("#shopping-progress-text"),
+      document.querySelector("#shopping-progress-text-full")
+    ].filter(Boolean);
 
-    if (progressText) {
-      progressText.textContent =
+    bars.forEach(bar => {
+      bar.style.width = `${percentage}%`;
+    });
+
+    texts.forEach(text => {
+      text.textContent =
         `${completed} of ${total} items completed`;
-    }
+    });
+  },
+
+  escapeHtml(value) {
+    const div = document.createElement("div");
+
+    div.textContent = value;
+
+    return div.innerHTML;
   }
 };
 
-document.addEventListener("DOMContentLoaded", () => {
-  MealMate.renderShopping();
-});
+
+/* ------------------------------
+   NAVIGATION
+------------------------------ */
+
+function setupNavigation() {
+  const buttons = document.querySelectorAll(
+    ".nav-button"
+  );
+
+  const sections = document.querySelectorAll(
+    ".page-section"
+  );
+
+  buttons.forEach(button => {
+    button.addEventListener("click", () => {
+      const target = button.dataset.section;
+
+      buttons.forEach(item => {
+        item.classList.remove("active");
+      });
+
+      button.classList.add("active");
+
+      sections.forEach(section => {
+        section.classList.toggle(
+          "hidden",
+          section.id !== target
+        );
+      });
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    });
+  });
+}
+
+
+/* ------------------------------
+   DARK MODE
+------------------------------ */
+
+function setupTheme() {
+  const savedTheme =
+    localStorage.getItem("mealmate-theme");
+
+  if (savedTheme === "dark") {
+    document.body.classList.add("dark");
+  }
+}
+
+
+function toggleTheme() {
+  document.body.classList.toggle("dark");
+
+  const theme =
+    document.body.classList.contains("dark")
+      ? "dark"
+      : "light";
+
+  localStorage.setItem(
+    "mealmate-theme",
+    theme
+  );
+}
+
+
+/* ------------------------------
+   SHOPPING
+------------------------------ */
+
+function addShoppingItemPrompt() {
+  const name = prompt(
+    "What do you need to buy?"
+  );
+
+  if (!name) return;
+
+  MealMate.addShoppingItem(name);
+}
+
+
+/* ------------------------------
+   START APPLICATION
+------------------------------ */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+    setupNavigation();
+    setupTheme();
+
+    MealMate.renderShopping();
+
+    /*
+     * Add a few starter items the first
+     * time the app is opened.
+     */
+
+    if (
+      !localStorage.getItem(
+        "mealmate-shopping-initialized"
+      )
+    ) {
+      MealMate.addShoppingItem(
+        "Chicken breast"
+      );
+
+      MealMate.addShoppingItem("Rice");
+      MealMate.addShoppingItem("Peppers");
+      MealMate.addShoppingItem("Onions");
+      MealMate.addShoppingItem("Pasta");
+
+      localStorage.setItem(
+        "mealmate-shopping-initialized",
+        "true"
+      );
+    }
+  }
+);
