@@ -1,11 +1,344 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Payments API</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f172a">
+  <title>MealMate</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+    }
+
+    .app {
+      max-width: 1100px;
+      margin: auto;
+      padding: 24px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: #0f172a;
+      color: white;
+      font-size: 24px;
+    }
+
+    h1, h2, h3, p {
+      margin-top: 0;
+    }
+
+    h1 {
+      margin-bottom: 2px;
+      font-size: 24px;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .week {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .day {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 14px;
+      min-height: 130px;
+    }
+
+    .day-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+    }
+
+    .meal-icon {
+      font-size: 28px;
+      margin: 18px 0 8px;
+    }
+
+    .meal-name {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: 0 8px 30px rgba(15, 23, 42, 0.04);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .card-header h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .button {
+      border: 0;
+      background: #0f172a;
+      color: white;
+      border-radius: 10px;
+      padding: 9px 14px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .shopping-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .shopping-item:last-child {
+      border-bottom: 0;
+    }
+
+    .shopping-item input {
+      width: 18px;
+      height: 18px;
+    }
+
+    .tonight {
+      text-align: center;
+    }
+
+    .tonight-icon {
+      font-size: 64px;
+      margin: 12px 0;
+    }
+
+    .tonight h3 {
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+
+    .meta {
+      color: #64748b;
+      font-size: 14px;
+      margin-bottom: 18px;
+    }
+
+    .progress {
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 99px;
+      overflow: hidden;
+      margin-top: 18px;
+    }
+
+    .progress-bar {
+      width: 65%;
+      height: 100%;
+      background: #0f172a;
+    }
+
+    @media (max-width: 800px) {
+      .app {
+        padding: 16px;
+      }
+
+      .week {
+        display: flex;
+        overflow-x: auto;
+        padding-bottom: 8px;
+      }
+
+      .day {
+        min-width: 120px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      header {
+        align-items: flex-start;
+      }
+    }
+  </style>
 </head>
+
 <body>
-    <h1>Payments API</h1>
-    <p>Version: 1.0.1</p>
-    <p>Status: Running</p>
+
+  <main class="app">
+
+    <header>
+      <div class="brand">
+        <div class="logo">🍴</div>
+        <div>
+          <h1>MealMate</h1>
+          <p class="subtitle">Plan less. Eat better.</p>
+        </div>
+      </div>
+
+      <button class="button">+ Add meal</button>
+    </header>
+
+    <section>
+      <h2>This week</h2>
+
+      <div class="week">
+
+        <div class="day">
+          <div class="day-name">Mon</div>
+          <div class="meal-icon">🍝</div>
+          <div class="meal-name">Pasta</div>
+        </div>
+
+        <div class="day">
+          <div class="day-name">Tue</div>
+          <div class="meal-icon">🍛</div>
+          <div class="meal-name">Chicken Curry</div>
+        </div>
+
+        <div class="day">
+          <div class="day-name">Wed</div>
+          <div class="meal-icon">🌮</div>
+          <div class="meal-name">Tacos</div>
+        </div>
+
+        <div class="day">
+          <div class="day-name">Thu</div>
+          <div class="meal-icon">🥘</div>
+          <div class="meal-name">Stir Fry</div>
+        </div>
+
+        <div class="day">
+          <div class="day-name">Fri</div>
+          <div class="meal-icon">🍕</div>
+          <div class="meal-name">Pizza</div>
+        </div>
+
+        <div class="day">
+          <div class="day-name">Sat</div>
+          <div class="meal-icon">🍔</div>
+          <div class="meal-name">Burgers</div>
+        </div>
+
+        <div class="day">
+          <div class="day-name">Sun</div>
+          <div class="meal-icon">🍗</div>
+          <div class="meal-name">Roast Dinner</div>
+        </div>
+
+      </div>
+    </section>
+
+    <div class="grid">
+
+      <section class="card">
+        <div class="card-header">
+          <h2>🛒 Shopping list</h2>
+          <button class="button">+ Add</button>
+        </div>
+
+        <label class="shopping-item">
+          <input type="checkbox">
+          Chicken breast
+        </label>
+
+        <label class="shopping-item">
+          <input type="checkbox">
+          Rice
+        </label>
+
+        <label class="shopping-item">
+          <input type="checkbox">
+          Peppers
+        </label>
+
+        <label class="shopping-item">
+          <input type="checkbox">
+          Onions
+        </label>
+
+        <label class="shopping-item">
+          <input type="checkbox">
+          Pasta
+        </label>
+
+        <div class="progress">
+          <div class="progress-bar"></div>
+        </div>
+
+        <p class="subtitle" style="margin-top: 8px;">
+          2 of 5 items completed
+        </p>
+      </section>
+
+      <section class="card tonight">
+
+        <div class="card-header">
+          <h2>🍳 Tonight</h2>
+        </div>
+
+        <div class="tonight-icon">🍛</div>
+
+        <h3>Chicken Curry</h3>
+
+        <p class="meta">
+          ⏱ 35 minutes · Easy
+        </p>
+
+        <button class="button">
+          View recipe
+        </button>
+
+      </section>
+
+    </div>
+
+  </main>
+
 </body>
 </html>
