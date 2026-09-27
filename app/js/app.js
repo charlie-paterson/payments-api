@@ -1,3 +1,12 @@
+document.addEventListener("DOMContentLoaded", () => {
+  initApp();
+});
+
+
+/* =========================
+   CONSTANTS
+   ========================= */
+
 const days = [
   "Monday",
   "Tuesday",
@@ -9,164 +18,218 @@ const days = [
 ];
 
 
+const foodGroups = [
+  {
+    id: "protein",
+    name: "Protein",
+    emoji: "🥩"
+  },
+  {
+    id: "carbs",
+    name: "Carbs",
+    emoji: "🍞"
+  },
+  {
+    id: "dairy",
+    name: "Dairy",
+    emoji: "🥛"
+  },
+  {
+    id: "fruit-veg",
+    name: "Fruit & Veg",
+    emoji: "🍎"
+  },
+  {
+    id: "drinks",
+    name: "Drinks",
+    emoji: "🥤"
+  },
+  {
+    id: "snacks",
+    name: "Snacks",
+    emoji: "🍿"
+  }
+];
+
+
 /* =========================
-   DEFAULT MEALS
+   DEFAULT DATA
    ========================= */
 
 const defaultMeals = [
   {
-    id: "meal-pasta",
-    title: "Tomato Pasta",
-    emoji: "🍝",
-    ingredients: [
-      {
-        name: "Pasta",
-        quantity: 250,
-        unit: "g"
-      },
-      {
-        name: "Tomatoes",
-        quantity: 400,
-        unit: "g"
-      },
-      {
-        name: "Onion",
-        quantity: 1,
-        unit: ""
-      },
-      {
-        name: "Garlic",
-        quantity: 2,
-        unit: "cloves"
-      },
-      {
-        name: "Fresh basil",
-        quantity: 1,
-        unit: "handful"
-      }
-    ]
-  },
-
-  {
-    id: "meal-curry",
+    id: "meal-chicken-curry",
     title: "Chicken Curry",
     emoji: "🍛",
+    description: "A quick and comforting curry.",
     ingredients: [
       {
-        name: "Chicken breast",
+        name: "Chicken",
         quantity: 500,
-        unit: "g"
+        unit: "g",
+        group: "protein"
       },
       {
         name: "Rice",
-        quantity: 250,
-        unit: "g"
+        quantity: 300,
+        unit: "g",
+        group: "carbs"
       },
       {
         name: "Onion",
         quantity: 1,
-        unit: ""
+        unit: "each",
+        group: "fruit-veg"
       },
       {
-        name: "Garlic",
-        quantity: 2,
-        unit: "cloves"
-      },
-      {
-        name: "Curry powder",
-        quantity: 2,
-        unit: "tbsp"
-      },
-      {
-        name: "Tomatoes",
-        quantity: 400,
-        unit: "g"
-      }
-    ]
-  },
-
-  {
-    id: "meal-tacos",
-    title: "Chicken Tacos",
-    emoji: "🌮",
-    ingredients: [
-      {
-        name: "Chicken breast",
-        quantity: 400,
-        unit: "g"
-      },
-      {
-        name: "Tortillas",
-        quantity: 6,
-        unit: ""
-      },
-      {
-        name: "Lettuce",
-        quantity: 1,
-        unit: ""
-      },
-      {
-        name: "Tomatoes",
-        quantity: 2,
-        unit: ""
-      },
-      {
-        name: "Cheddar cheese",
-        quantity: 100,
-        unit: "g"
-      },
-      {
-        name: "Salsa",
-        quantity: 1,
-        unit: "jar"
+        name: "Milk",
+        quantity: 200,
+        unit: "ml",
+        group: "dairy"
       }
     ]
   }
 ];
 
 
+const defaultWeekPlan = {
+  Monday: "meal-chicken-curry",
+  Tuesday: null,
+  Wednesday: null,
+  Thursday: null,
+  Friday: null,
+  Saturday: null,
+  Sunday: null
+};
+
+
 /* =========================
-   APP STATE
+   STATE
    ========================= */
 
-let meals =
-  JSON.parse(
-    localStorage.getItem(
-      "mealmate-meals"
-    )
-  ) || defaultMeals;
+let meals = loadMeals();
+
+let weekPlan = loadWeekPlan();
+
+let shopping = loadShopping();
 
 
-let weekPlan =
-  JSON.parse(
-    localStorage.getItem(
-      "mealmate-week"
-    )
-  ) || {
-    Monday: "meal-pasta",
-    Tuesday: "meal-curry",
-    Wednesday: "meal-tacos",
-    Thursday: null,
-    Friday: null,
-    Saturday: null,
-    Sunday: null
-  };
+/* =========================
+   INITIALISE
+   ========================= */
 
+function initApp() {
 
-let shopping =
-  JSON.parse(
-    localStorage.getItem(
-      "mealmate-shopping"
-    )
-  ) || [];
+  setupNavigation();
 
+  renderPlanner();
 
-let editingMealId = null;
+  renderMeals();
+
+  generateShoppingList();
+
+  setupTheme();
+
+}
 
 
 /* =========================
    STORAGE
    ========================= */
+
+function loadMeals() {
+
+  try {
+
+    const saved = JSON.parse(
+      localStorage.getItem("mealmate-meals")
+    );
+
+    if (!Array.isArray(saved)) {
+      return structuredClone(defaultMeals);
+    }
+
+    return saved.map(meal => ({
+      ...meal,
+
+      ingredients: Array.isArray(meal.ingredients)
+        ? meal.ingredients.map(ingredient => ({
+            name: String(ingredient.name || ""),
+            quantity: Number(ingredient.quantity) || 0,
+            unit: String(ingredient.unit || "each"),
+            group: String(
+              ingredient.group || "fruit-veg"
+            )
+          }))
+        : []
+    }));
+
+  } catch (error) {
+
+    console.error(
+      "Could not load meals:",
+      error
+    );
+
+    return structuredClone(defaultMeals);
+  }
+}
+
+
+function loadWeekPlan() {
+
+  try {
+
+    const saved = JSON.parse(
+      localStorage.getItem("mealmate-week")
+    );
+
+    if (!saved || typeof saved !== "object") {
+      return { ...defaultWeekPlan };
+    }
+
+    return {
+      ...defaultWeekPlan,
+      ...saved
+    };
+
+  } catch (error) {
+
+    console.error(
+      "Could not load week plan:",
+      error
+    );
+
+    return { ...defaultWeekPlan };
+  }
+}
+
+
+function loadShopping() {
+
+  try {
+
+    const saved = JSON.parse(
+      localStorage.getItem("mealmate-shopping")
+    );
+
+    if (!Array.isArray(saved)) {
+      return [];
+    }
+
+    return saved;
+
+  } catch (error) {
+
+    console.error(
+      "Could not load shopping list:",
+      error
+    );
+
+    return [];
+  }
+}
+
 
 function saveMeals() {
 
@@ -174,17 +237,15 @@ function saveMeals() {
     "mealmate-meals",
     JSON.stringify(meals)
   );
-
 }
 
 
-function saveWeek() {
+function saveWeekPlan() {
 
   localStorage.setItem(
     "mealmate-week",
     JSON.stringify(weekPlan)
   );
-
 }
 
 
@@ -194,6 +255,373 @@ function saveShopping() {
     "mealmate-shopping",
     JSON.stringify(shopping)
   );
+}
+
+
+/* =========================
+   NAVIGATION
+   ========================= */
+
+function setupNavigation() {
+
+  const buttons =
+    document.querySelectorAll(".nav-button");
+
+  const sections =
+    document.querySelectorAll(".page-section");
+
+
+  buttons.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+      const target =
+        button.dataset.section;
+
+
+      buttons.forEach(item => {
+        item.classList.remove("active");
+      });
+
+      button.classList.add("active");
+
+
+      sections.forEach(section => {
+
+        section.classList.toggle(
+          "hidden",
+          section.id !== target
+        );
+
+      });
+
+    });
+
+  });
+}
+
+
+/* =========================
+   PLANNER
+   ========================= */
+
+function renderPlanner() {
+
+  const weekGrid =
+    document.querySelector(".week-grid");
+
+  if (!weekGrid) return;
+
+
+  weekGrid.innerHTML = "";
+
+
+  days.forEach(day => {
+
+    const mealId =
+      weekPlan[day];
+
+    const meal =
+      meals.find(item => item.id === mealId);
+
+
+    const card =
+      document.createElement("article");
+
+    card.className = "day-card";
+
+
+    if (!meal) {
+
+      card.classList.add("empty-day");
+
+      card.innerHTML = `
+        <div class="day-header">
+          <strong>${day}</strong>
+        </div>
+
+        <div class="day-empty">
+          <span>+</span>
+          <p>No meal planned</p>
+        </div>
+      `;
+
+    } else {
+
+      card.innerHTML = `
+        <div class="day-header">
+          <strong>${day}</strong>
+        </div>
+
+        <div class="day-meal">
+
+          <div class="meal-emoji">
+            ${meal.emoji || "🍽️"}
+          </div>
+
+          <div>
+            <h3>${escapeHtml(meal.title)}</h3>
+
+            <p>
+              ${meal.ingredients.length}
+              ingredient${meal.ingredients.length === 1 ? "" : "s"}
+            </p>
+          </div>
+
+        </div>
+      `;
+
+    }
+
+
+    card.addEventListener(
+      "click",
+      () => openDayMeal(day)
+    );
+
+
+    weekGrid.appendChild(card);
+
+  });
+
+
+  updateTonightCard();
+}
+
+
+/* =========================
+   DAY / MEAL ASSIGNMENT
+   ========================= */
+
+function openDayMeal(day) {
+
+  const mealId =
+    weekPlan[day];
+
+
+  if (mealId) {
+
+    const meal =
+      meals.find(item => item.id === mealId);
+
+    if (meal) {
+
+      openEditMealModal(
+        meal,
+        day
+      );
+
+      return;
+    }
+
+  }
+
+
+  openMealModal(day);
+}
+
+
+/* =========================
+   TONIGHT CARD
+   ========================= */
+
+function updateTonightCard() {
+
+  const today =
+    new Date().toLocaleDateString(
+      "en-GB",
+      { weekday: "long" }
+    );
+
+
+  const mealId =
+    weekPlan[today];
+
+
+  const meal =
+    meals.find(item => item.id === mealId);
+
+
+  const tonightCard =
+    document.querySelector(".tonight-card");
+
+
+  if (!tonightCard) return;
+
+
+  const title =
+    tonightCard.querySelector("h2");
+
+  const description =
+    tonightCard.querySelector(".muted");
+
+  const emoji =
+    tonightCard.querySelector(".big-food");
+
+
+  if (!meal) {
+
+    if (title) {
+      title.textContent = "Nothing planned";
+    }
+
+    if (description) {
+      description.textContent =
+        "You haven't planned a meal for tonight yet.";
+    }
+
+    if (emoji) {
+      emoji.textContent = "🍽️";
+    }
+
+    return;
+  }
+
+
+  if (title) {
+    title.textContent =
+      meal.title;
+  }
+
+  if (description) {
+    description.textContent =
+      meal.description ||
+      "A delicious meal planned for tonight.";
+  }
+
+  if (emoji) {
+    emoji.textContent =
+      meal.emoji || "🍽️";
+  }
+
+}
+
+
+/* =========================
+   MEAL LIBRARY
+   ========================= */
+
+function renderMeals() {
+
+  const recipeGrid =
+    document.querySelector(".recipe-grid");
+
+  if (!recipeGrid) return;
+
+
+  recipeGrid.innerHTML = "";
+
+
+  if (meals.length === 0) {
+
+    recipeGrid.innerHTML = `
+      <div class="card">
+        <h3>No meals yet</h3>
+        <p class="muted">
+          Create your first meal to get started.
+        </p>
+      </div>
+    `;
+
+    return;
+  }
+
+
+  meals.forEach(meal => {
+
+    const card =
+      document.createElement("article");
+
+    card.className =
+      "card recipe-card";
+
+
+    const ingredientText =
+      meal.ingredients
+        .map(item =>
+          `${item.name} (${item.quantity}${item.unit})`
+        )
+        .join(", ");
+
+
+    card.innerHTML = `
+      <div class="card-title">
+
+        <div>
+          <span class="eyebrow">
+            MEAL
+          </span>
+
+          <h2>
+            ${escapeHtml(meal.title)}
+          </h2>
+        </div>
+
+        <span class="big-food">
+          ${meal.emoji || "🍽️"}
+        </span>
+
+      </div>
+
+      <p class="muted">
+        ${escapeHtml(
+          meal.description ||
+          "Custom Meal"
+        )}
+      </p>
+
+      <p class="muted">
+        ${escapeHtml(ingredientText)}
+      </p>
+
+      <div class="meal-card-actions">
+
+        <button
+          class="secondary-button"
+          type="button"
+          data-action="edit"
+        >
+          Edit
+        </button>
+
+        <button
+          class="delete-meal-button"
+          type="button"
+          data-action="delete"
+        >
+          Delete
+        </button>
+
+      </div>
+    `;
+
+
+    const editButton =
+      card.querySelector(
+        '[data-action="edit"]'
+      );
+
+    const deleteButton =
+      card.querySelector(
+        '[data-action="delete"]'
+      );
+
+
+    editButton.addEventListener(
+      "click",
+      () => openEditMealModal(meal)
+    );
+
+
+    deleteButton.addEventListener(
+      "click",
+      () => deleteMeal(meal.id)
+    );
+
+
+    recipeGrid.appendChild(card);
+
+  });
 
 }
 
@@ -202,57 +630,158 @@ function saveShopping() {
    MEAL MODAL
    ========================= */
 
-function openMealModal(mealId = null) {
+let editingMealId = null;
 
-  editingMealId = mealId;
+let editingMealDay = null;
+
+
+function openMealModal(day = "Monday") {
+
+  editingMealId = null;
+
+  editingMealDay = null;
+
 
   const modal =
-    document.querySelector(
-      "#meal-modal"
+    document.getElementById(
+      "meal-modal"
     );
+
 
   const titleInput =
-    document.querySelector(
-      "#meal-title"
+    document.getElementById(
+      "meal-title"
     );
+
 
   const daySelect =
-    document.querySelector(
-      "#meal-day"
+    document.getElementById(
+      "meal-day"
     );
 
+
   const ingredientList =
-    document.querySelector(
-      "#ingredient-list"
+    document.getElementById(
+      "ingredient-list"
     );
 
 
   if (!modal) return;
 
 
+  modal.querySelector(
+    ".eyebrow"
+  ).textContent = "NEW MEAL";
+
+
+  modal.querySelector(
+    "h2"
+  ).textContent = "Create a meal";
+
+
+  titleInput.value = "";
+
+
+  daySelect.value =
+    days.includes(day)
+      ? day
+      : "Monday";
+
+
   ingredientList.innerHTML = "";
 
 
-  if (mealId) {
-
-    const meal =
-      meals.find(
-        item =>
-          item.id === mealId
-      );
+  addIngredientRow();
 
 
-    if (!meal) return;
+  modal.classList.remove("hidden");
+
+  modal.setAttribute(
+    "aria-hidden",
+    "false"
+  );
 
 
-    titleInput.value =
-      meal.title;
+  setTimeout(() => {
+    titleInput.focus();
+  }, 50);
+
+}
 
 
-    daySelect.value =
-      getMealDay(mealId) ||
-      "Monday";
+function openEditMealModal(
+  meal,
+  day = null
+) {
 
+  editingMealId =
+    meal.id;
+
+  editingMealDay =
+    day;
+
+
+  const modal =
+    document.getElementById(
+      "meal-modal"
+    );
+
+
+  const titleInput =
+    document.getElementById(
+      "meal-title"
+    );
+
+
+  const daySelect =
+    document.getElementById(
+      "meal-day"
+    );
+
+
+  const ingredientList =
+    document.getElementById(
+      "ingredient-list"
+    );
+
+
+  if (!modal) return;
+
+
+  modal.querySelector(
+    ".eyebrow"
+  ).textContent = "EDIT MEAL";
+
+
+  modal.querySelector(
+    "h2"
+  ).textContent = "Edit meal";
+
+
+  titleInput.value =
+    meal.title;
+
+
+  const assignedDay =
+    day ||
+    days.find(
+      item => weekPlan[item] === meal.id
+    );
+
+
+  daySelect.value =
+    assignedDay || "Monday";
+
+
+  ingredientList.innerHTML = "";
+
+
+  if (
+    Array.isArray(
+      meal.ingredients
+    ) &&
+    meal.ingredients.length > 0
+  ) {
 
     meal.ingredients.forEach(
       ingredient => {
@@ -264,13 +793,7 @@ function openMealModal(mealId = null) {
       }
     );
 
-
   } else {
-
-    titleInput.value = "";
-
-    daySelect.value =
-      "Monday";
 
     addIngredientRow();
 
@@ -281,17 +804,15 @@ function openMealModal(mealId = null) {
     "hidden"
   );
 
-
   modal.setAttribute(
     "aria-hidden",
     "false"
   );
 
 
-  setTimeout(
-    () => titleInput.focus(),
-    50
-  );
+  setTimeout(() => {
+    titleInput.focus();
+  }, 50);
 
 }
 
@@ -299,8 +820,8 @@ function openMealModal(mealId = null) {
 function closeMealModal() {
 
   const modal =
-    document.querySelector(
-      "#meal-modal"
+    document.getElementById(
+      "meal-modal"
     );
 
 
@@ -311,7 +832,6 @@ function closeMealModal() {
     "hidden"
   );
 
-
   modal.setAttribute(
     "aria-hidden",
     "true"
@@ -319,6 +839,8 @@ function closeMealModal() {
 
 
   editingMealId = null;
+
+  editingMealDay = null;
 
 }
 
@@ -328,12 +850,12 @@ function closeMealModal() {
    ========================= */
 
 function addIngredientRow(
-  ingredient = null
+  existing = null
 ) {
 
   const list =
-    document.querySelector(
-      "#ingredient-list"
+    document.getElementById(
+      "ingredient-list"
     );
 
 
@@ -341,44 +863,86 @@ function addIngredientRow(
 
 
   const row =
-    document.createElement(
-      "div"
-    );
+    document.createElement("div");
 
 
   row.className =
     "ingredient-row";
 
 
+  const group =
+    existing?.group ||
+    "fruit-veg";
+
+
   row.innerHTML = `
+
     <input
       type="text"
       class="ingredient-name"
       placeholder="Ingredient"
       value="${escapeAttribute(
-        ingredient?.name || ""
+        existing?.name || ""
       )}"
     >
 
     <input
       type="number"
       class="ingredient-quantity"
-      placeholder="Qty"
       min="0"
       step="any"
-      value="${
-        ingredient?.quantity ?? ""
-      }"
+      placeholder="Qty"
+      value="${existing?.quantity ?? ""}"
     >
 
-    <input
-      type="text"
-      class="ingredient-unit"
-      placeholder="Unit"
-      value="${escapeAttribute(
-        ingredient?.unit || ""
-      )}"
-    >
+    <select class="ingredient-unit">
+
+      <option value="each">
+        Each
+      </option>
+
+      <option value="g">
+        g
+      </option>
+
+      <option value="kg">
+        kg
+      </option>
+
+      <option value="ml">
+        ml
+      </option>
+
+      <option value="l">
+        l
+      </option>
+
+      <option value="pack">
+        Pack
+      </option>
+
+      <option value="tin">
+        Tin
+      </option>
+
+      <option value="bottle">
+        Bottle
+      </option>
+
+    </select>
+
+    <select class="ingredient-group">
+
+      ${foodGroups.map(foodGroup => `
+        <option
+          value="${foodGroup.id}"
+          ${group === foodGroup.id ? "selected" : ""}
+        >
+          ${foodGroup.emoji} ${foodGroup.name}
+        </option>
+      `).join("")}
+
+    </select>
 
     <button
       type="button"
@@ -387,21 +951,32 @@ function addIngredientRow(
     >
       ×
     </button>
+
   `;
 
 
-  row
-    .querySelector(
-      ".remove-ingredient"
-    )
-    .addEventListener(
-      "click",
-      () => {
-
-        row.remove();
-
-      }
+  const unitSelect =
+    row.querySelector(
+      ".ingredient-unit"
     );
+
+
+  if (existing?.unit) {
+    unitSelect.value =
+      existing.unit;
+  }
+
+
+  row.querySelector(
+    ".remove-ingredient"
+  ).addEventListener(
+    "click",
+    () => {
+
+      row.remove();
+
+    }
+  );
 
 
   list.appendChild(row);
@@ -416,14 +991,20 @@ function addIngredientRow(
 function saveNewMeal() {
 
   const titleInput =
-    document.querySelector(
-      "#meal-title"
+    document.getElementById(
+      "meal-title"
     );
 
 
   const daySelect =
-    document.querySelector(
-      "#meal-day"
+    document.getElementById(
+      "meal-day"
+    );
+
+
+  const ingredientRows =
+    document.querySelectorAll(
+      "#ingredient-list .ingredient-row"
     );
 
 
@@ -434,126 +1015,92 @@ function saveNewMeal() {
   if (!title) {
 
     alert(
-      "Please give your meal a title."
+      "Please enter a meal title."
     );
 
     titleInput.focus();
 
     return;
-
   }
-
-
-  const ingredientRows =
-    document.querySelectorAll(
-      ".ingredient-row"
-    );
 
 
   const ingredients = [];
 
 
-  ingredientRows.forEach(
-    row => {
+  ingredientRows.forEach(row => {
 
-      const name =
-        row
-          .querySelector(
-            ".ingredient-name"
-          )
-          .value
-          .trim();
+    const name =
+      row.querySelector(
+        ".ingredient-name"
+      ).value.trim();
 
 
-      const quantity =
-        Number(
-          row
-            .querySelector(
-              ".ingredient-quantity"
-            )
-            .value
-        );
+    if (!name) return;
 
 
-      const unit =
-        row
-          .querySelector(
-            ".ingredient-unit"
-          )
-          .value
-          .trim();
-
-
-      if (!name) return;
-
-
-      ingredients.push({
-        name,
-
-        quantity:
-          Number.isFinite(
-            quantity
-          )
-            ? quantity
-            : 0,
-
-        unit
-      });
-
-    }
-  );
-
-
-  if (
-    ingredients.length === 0
-  ) {
-
-    alert(
-      "Add at least one ingredient."
-    );
-
-    return;
-
-  }
-
-
-  /* EDIT EXISTING MEAL */
-
-  if (editingMealId) {
-
-    const meal =
-      meals.find(
-        item =>
-          item.id ===
-          editingMealId
+    const quantity =
+      Number(
+        row.querySelector(
+          ".ingredient-quantity"
+        ).value
       );
 
 
-    if (!meal) return;
+    const unit =
+      row.querySelector(
+        ".ingredient-unit"
+      ).value;
 
 
-    meal.title =
-      title;
+    const group =
+      row.querySelector(
+        ".ingredient-group"
+      ).value;
 
 
-    meal.ingredients =
-      ingredients;
+    ingredients.push({
+
+      name,
+
+      quantity:
+        Number.isFinite(quantity)
+          ? quantity
+          : 0,
+
+      unit,
+
+      group
+
+    });
+
+  });
 
 
-    moveMealToDay(
-      editingMealId,
-      daySelect.value
+  if (ingredients.length === 0) {
+
+    alert(
+      "Please add at least one ingredient."
     );
 
-
+    return;
   }
 
 
-  /* CREATE NEW MEAL */
+  const selectedDay =
+    daySelect.value;
 
-  else {
 
-    const meal = {
+  if (editingMealId) {
+
+    updateExistingMeal(
+      title,
+      ingredients,
+      selectedDay
+    );
+
+  } else {
+
+    const newMeal = {
 
       id:
         `meal-${Date.now()}`,
@@ -562,28 +1109,32 @@ function saveNewMeal() {
 
       emoji: "🍽️",
 
+      description:
+        "A custom meal added to MealMate.",
+
       ingredients
 
     };
 
 
     meals.push(
-      meal
+      newMeal
     );
 
 
-    weekPlan[
-      daySelect.value
-    ] = meal.id;
+    weekPlan[selectedDay] =
+      newMeal.id;
 
   }
 
 
   saveMeals();
 
-  saveWeek();
+  saveWeekPlan();
+
 
   closeMealModal();
+
 
   renderPlanner();
 
@@ -595,425 +1146,54 @@ function saveNewMeal() {
 
 
 /* =========================
-   WEEKLY PLANNER
+   UPDATE MEAL
    ========================= */
 
-function renderPlanner() {
-
-  const grid =
-    document.querySelector(
-      ".week-grid"
-    );
-
-
-  if (!grid) return;
-
-
-  grid.innerHTML = "";
-
-
-  days.forEach(
-    day => {
-
-      const mealId =
-        weekPlan[day];
-
-
-      const meal =
-        meals.find(
-          item =>
-            item.id === mealId
-        );
-
-
-      const card =
-        document.createElement(
-          "article"
-        );
-
-
-      card.className =
-        "day-card";
-
-
-      /* EMPTY DAY */
-
-      if (!meal) {
-
-        card.classList.add(
-          "empty-day"
-        );
-
-
-        card.innerHTML = `
-          <span class="day-name">
-            ${day
-              .substring(0, 3)
-              .toUpperCase()}
-          </span>
-
-          <div class="meal-icon">
-            ➕
-          </div>
-
-          <h3>
-            Nothing planned
-          </h3>
-
-          <p>
-            Click to add a meal
-          </p>
-        `;
-
-
-        card.addEventListener(
-          "click",
-          () => {
-
-            openMealModal();
-
-            document.querySelector(
-              "#meal-day"
-            ).value = day;
-
-          }
-        );
-
-
-      }
-
-
-      /* PLANNED MEAL */
-
-      else {
-
-        card.innerHTML = `
-          <span class="day-name">
-            ${day
-              .substring(0, 3)
-              .toUpperCase()}
-          </span>
-
-          <div class="meal-icon">
-            ${meal.emoji}
-          </div>
-
-          <h3>
-            ${escapeHtml(
-              meal.title
-            )}
-          </h3>
-
-          <p>
-            ${
-              meal.ingredients.length
-            }
-            ingredients
-          </p>
-        `;
-
-
-        card.setAttribute(
-          "role",
-          "button"
-        );
-
-
-        card.setAttribute(
-          "tabindex",
-          "0"
-        );
-
-
-        card.setAttribute(
-          "aria-label",
-          `Edit ${
-            meal.title
-          } for ${day}`
-        );
-
-
-        card.addEventListener(
-          "click",
-          () => {
-
-            openMealModal(
-              meal.id
-            );
-
-          }
-        );
-
-
-        card.addEventListener(
-          "keydown",
-          event => {
-
-            if (
-              event.key ===
-                "Enter" ||
-              event.key === " "
-            ) {
-
-              event.preventDefault();
-
-              openMealModal(
-                meal.id
-              );
-
-            }
-
-          }
-        );
-
-      }
-
-
-      grid.appendChild(
-        card
-      );
-
-    }
-  );
-
-
-  renderTonight();
-
-}
-
-
-/* =========================
-   TONIGHT
-   ========================= */
-
-function renderTonight() {
-
-  const today =
-    new Date()
-      .toLocaleDateString(
-        "en-GB",
-        {
-          weekday:
-            "long"
-        }
-      );
-
-
-  const mealId =
-    weekPlan[today];
-
+function updateExistingMeal(
+  title,
+  ingredients,
+  selectedDay
+) {
 
   const meal =
     meals.find(
-      item =>
-        item.id === mealId
+      item => item.id === editingMealId
     );
 
 
-  const title =
-    document.querySelector(
-      ".tonight-card h2"
-    );
+  if (!meal) return;
 
 
-  const description =
-    document.querySelector(
-      ".tonight-card .muted"
-    );
+  meal.title =
+    title;
 
 
-  const food =
-    document.querySelector(
-      ".tonight-card .big-food"
-    );
+  meal.ingredients =
+    ingredients;
 
 
-  if (!title) return;
+  /*
+   * Remove this meal from any
+   * existing day before assigning
+   * it to the newly selected day.
+   */
 
+  days.forEach(day => {
 
-  if (!meal) {
+    if (
+      weekPlan[day] ===
+      editingMealId
+    ) {
 
-    title.textContent =
-      "Nothing planned";
-
-
-    description.textContent =
-      `You haven't planned a meal for ${today} yet.`;
-
-
-    food.textContent =
-      "🍽️";
-
-
-    return;
-
-  }
-
-
-  title.textContent =
-    meal.title;
-
-
-  description.textContent =
-    `${meal.ingredients.length} ingredients planned for tonight.`;
-
-
-  food.textContent =
-    meal.emoji;
-
-}
-
-
-/* =========================
-   MEAL LIBRARY
-   ========================= */
-
-function renderMeals() {
-
-  const grid =
-    document.querySelector(
-      ".recipe-grid"
-    );
-
-
-  if (!grid) return;
-
-
-  grid.innerHTML = "";
-
-
-  if (
-    meals.length === 0
-  ) {
-
-    grid.innerHTML = `
-      <p class="muted">
-        You haven't created any meals yet.
-      </p>
-    `;
-
-
-    return;
-
-  }
-
-
-  meals.forEach(
-    meal => {
-
-      const card =
-        document.createElement(
-          "article"
-        );
-
-
-      card.className =
-        "recipe-card";
-
-
-      card.innerHTML = `
-
-        <div class="recipe-image">
-          ${meal.emoji}
-        </div>
-
-        <div class="recipe-content">
-
-          <h3>
-            ${escapeHtml(
-              meal.title
-            )}
-          </h3>
-
-          <p>
-            ${
-              meal.ingredients.length
-            }
-            ingredients
-          </p>
-
-          <div class="recipe-meta">
-
-            <span>
-              ${
-                meal.ingredients.length
-              }
-              items
-            </span>
-
-            <span>
-              ${
-                getMealDay(
-                  meal.id
-                ) ||
-                "Unplanned"
-              }
-            </span>
-
-          </div>
-
-          <div class="meal-card-actions">
-
-            <button
-              type="button"
-              class="secondary-button"
-              data-edit
-            >
-              Edit
-            </button>
-
-            <button
-              type="button"
-              class="delete-meal-button"
-              data-delete
-            >
-              Delete
-            </button>
-
-          </div>
-
-        </div>
-      `;
-
-
-      card
-        .querySelector(
-          "[data-edit]"
-        )
-        .addEventListener(
-          "click",
-          () => {
-
-            openMealModal(
-              meal.id
-            );
-
-          }
-        );
-
-
-      card
-        .querySelector(
-          "[data-delete]"
-        )
-        .addEventListener(
-          "click",
-          () => {
-
-            deleteMeal(
-              meal.id
-            );
-
-          }
-        );
-
-
-      grid.appendChild(
-        card
-      );
+      weekPlan[day] = null;
 
     }
-  );
+
+  });
+
+
+  weekPlan[selectedDay] =
+    editingMealId;
 
 }
 
@@ -1028,8 +1208,7 @@ function deleteMeal(
 
   const meal =
     meals.find(
-      item =>
-        item.id === mealId
+      item => item.id === mealId
     );
 
 
@@ -1047,89 +1226,33 @@ function deleteMeal(
 
   meals =
     meals.filter(
-      item =>
-        item.id !== mealId
+      item => item.id !== mealId
     );
 
 
-  days.forEach(
-    day => {
+  days.forEach(day => {
 
-      if (
-        weekPlan[day] ===
-        mealId
-      ) {
+    if (
+      weekPlan[day] === mealId
+    ) {
 
-        weekPlan[day] =
-          null;
-
-      }
+      weekPlan[day] = null;
 
     }
-  );
+
+  });
 
 
   saveMeals();
 
-  saveWeek();
+  saveWeekPlan();
+
 
   renderPlanner();
 
   renderMeals();
 
   generateShoppingList();
-
-}
-
-
-/* =========================
-   DAY HELPERS
-   ========================= */
-
-function getMealDay(
-  mealId
-) {
-
-  return (
-    days.find(
-      day =>
-        weekPlan[day] ===
-        mealId
-    ) || null
-  );
-
-}
-
-
-function moveMealToDay(
-  mealId,
-  newDay
-) {
-
-  days.forEach(
-    day => {
-
-      if (
-        weekPlan[day] ===
-        mealId
-      ) {
-
-        weekPlan[day] =
-          null;
-
-      }
-
-    }
-  );
-
-
-  /*
-   * If another meal was already
-   * assigned to this day, replace it.
-   */
-
-  weekPlan[newDay] =
-    mealId;
 
 }
 
@@ -1144,241 +1267,172 @@ function generateShoppingList() {
 
 
   /*
-   * Look at every day in the week.
+   * Build ingredients from
+   * meals currently assigned
+   * to the week.
    */
 
-  days.forEach(
-    day => {
+  days.forEach(day => {
 
-      const mealId =
-        weekPlan[day];
-
-
-      if (!mealId) return;
+    const mealId =
+      weekPlan[day];
 
 
-      const meal =
-        meals.find(
-          item =>
-            item.id ===
-            mealId
-        );
+    if (!mealId) return;
 
 
-      if (!meal) return;
-
-
-      if (
-        !Array.isArray(
-          meal.ingredients
-        )
-      ) {
-        return;
-      }
-
-
-      /*
-       * Add every ingredient
-       * from this meal.
-       */
-
-      meal.ingredients.forEach(
-        ingredient => {
-
-          const name =
-            String(
-              ingredient.name ||
-                ""
-            ).trim();
-
-
-          if (!name) return;
-
-
-          const unit =
-            String(
-              ingredient.unit ||
-                ""
-            ).trim();
-
-
-          /*
-           * Same ingredient + same
-           * unit = same shopping item.
-           */
-
-          const key =
-            `${name.toLowerCase()}|${unit.toLowerCase()}`;
-
-
-          if (
-            !aggregated[key]
-          ) {
-
-            aggregated[key] = {
-
-              id:
-                `ingredient-${name
-                  .toLowerCase()
-                  .replace(
-                    /[^a-z0-9]+/g,
-                    "-"
-                  )}-${unit
-                  .toLowerCase()
-                  .replace(
-                    /[^a-z0-9]+/g,
-                    "-"
-                  )}`,
-
-              name,
-
-              quantity: 0,
-
-              unit,
-
-              completed:
-                false
-
-            };
-
-          }
-
-
-          const quantity =
-            Number(
-              ingredient.quantity
-            );
-
-
-          if (
-            Number.isFinite(
-              quantity
-            )
-          ) {
-
-            aggregated[key]
-              .quantity +=
-              quantity;
-
-          }
-
-        }
+    const meal =
+      meals.find(
+        item => item.id === mealId
       );
 
+
+    if (
+      !meal ||
+      !Array.isArray(meal.ingredients)
+    ) {
+      return;
     }
-  );
 
 
-  /*
-   * Remember which items the user
-   * has already checked off.
-   *
-   * String() prevents old/broken
-   * shopping data from crashing.
-   */
+    meal.ingredients.forEach(
+      ingredient => {
 
-  const previous =
-    new Map(
-      shopping.map(
-        item => {
-
-          const name =
-            String(
-              item.name || ""
-            ).toLowerCase();
+        const name =
+          String(
+            ingredient.name || ""
+          ).trim();
 
 
-          const unit =
-            String(
-              item.unit || ""
-            ).toLowerCase();
+        if (!name) return;
 
 
-          return [
-            `${name}|${unit}`,
-            item
-          ];
-
-        }
-      )
-    );
+        const unit =
+          String(
+            ingredient.unit || ""
+          ).trim();
 
 
-  /*
-   * Rebuild the generated list.
-   */
-
-  shopping =
-    Object.values(
-      aggregated
-    ).map(
-      item => {
-
-        const oldItem =
-          previous.get(
-            `${item.name.toLowerCase()}|${item.unit.toLowerCase()}`
+        const group =
+          String(
+            ingredient.group ||
+            "fruit-veg"
           );
 
 
-        return {
+        const key =
+          `${name.toLowerCase()}|${unit.toLowerCase()}|${group}`;
 
-          ...item,
 
-          completed:
-            oldItem
-              ? Boolean(
-                  oldItem.completed
-                )
-              : false
+        if (!aggregated[key]) {
 
-        };
+          aggregated[key] = {
+
+            id:
+              `ingredient-${Object.keys(
+                aggregated
+              ).length}`,
+
+            name,
+
+            quantity: 0,
+
+            unit,
+
+            group,
+
+            source: "meal"
+
+          };
+
+        }
+
+
+        const quantity =
+          Number(
+            ingredient.quantity
+          );
+
+
+        if (
+          Number.isFinite(quantity)
+        ) {
+
+          aggregated[key]
+            .quantity += quantity;
+
+        }
 
       }
     );
 
+  });
+
 
   /*
-   * Keep manually-added shopping
-   * items as well.
+   * IMPORTANT:
+   * Keep manually added shopping
+   * items before replacing the
+   * generated list.
    */
 
   const manualItems =
     shopping.filter(
       item =>
-        item.source ===
-        "manual"
+        item.source === "manual"
+    );
+
+
+  /*
+   * Remember which generated
+   * items were already checked off.
+   */
+
+  const previous =
+    new Map(
+      shopping.map(item => [
+
+        `${String(
+          item.name || ""
+        ).toLowerCase()}|${String(
+          item.unit || ""
+        ).toLowerCase()}|${String(
+          item.group || ""
+        )}`,
+
+        item
+
+      ])
     );
 
 
   const generatedItems =
     Object.values(
       aggregated
-    ).map(
-      item => {
+    ).map(item => {
 
-        const oldItem =
-          previous.get(
-            `${item.name.toLowerCase()}|${item.unit.toLowerCase()}`
-          );
+      const key =
+        `${item.name.toLowerCase()}|${item.unit.toLowerCase()}|${item.group}`;
 
 
-        return {
+      const oldItem =
+        previous.get(key);
 
-          ...item,
 
-          source: "meal",
+      return {
 
-          completed:
-            oldItem
-              ? Boolean(
-                  oldItem.completed
-                )
-              : false
+        ...item,
 
-        };
+        completed:
+          oldItem
+            ? Boolean(
+                oldItem.completed
+              )
+            : false
 
-      }
-    );
+      };
+
+    });
 
 
   shopping = [
@@ -1395,266 +1449,258 @@ function generateShoppingList() {
 
 
 /* =========================
-   SHOPPING LIST RENDER
+   SHOPPING RENDERING
    ========================= */
 
 function renderShopping() {
 
-  const lists = [
-
-    document.querySelector(
-      "#shopping-list"
-    ),
-
-    document.querySelector(
-      "#shopping-list-full"
+  renderShoppingList(
+    document.getElementById(
+      "shopping-list"
     )
-
-  ].filter(Boolean);
-
-
-  lists.forEach(
-    list => {
-
-      list.innerHTML = "";
+  );
 
 
-      if (
-        shopping.length === 0
-      ) {
-
-        list.innerHTML = `
-          <p class="muted">
-            Plan a meal and your shopping list will appear here.
-          </p>
-        `;
+  renderShoppingList(
+    document.getElementById(
+      "shopping-list-full"
+    )
+  );
 
 
+  updateShoppingProgress(
+    "shopping-progress",
+    "shopping-progress-text"
+  );
+
+
+  updateShoppingProgress(
+    "shopping-progress-full",
+    "shopping-progress-text-full"
+  );
+
+}
+
+
+function renderShoppingList(
+  container
+) {
+
+  if (!container) return;
+
+
+  container.innerHTML = "";
+
+
+  if (shopping.length === 0) {
+
+    container.innerHTML = `
+      <div class="empty-shopping">
+        <p>No shopping items yet.</p>
+      </div>
+    `;
+
+    return;
+  }
+
+
+  foodGroups.forEach(
+    foodGroup => {
+
+      const items =
+        shopping.filter(
+          item =>
+            (
+              item.group ||
+              "fruit-veg"
+            ) === foodGroup.id
+        );
+
+
+      if (items.length === 0) {
         return;
-
       }
 
 
-      shopping.forEach(
-        item => {
-
-          const row =
-            document.createElement(
-              "div"
-            );
+      const group =
+        document.createElement(
+          "div"
+        );
 
 
-          row.className =
-            "shopping-item";
+      group.className =
+        "shopping-group";
 
 
-          const quantity =
-            formatQuantity(
-              item
-            );
+      group.innerHTML = `
+
+        <div class="shopping-group-header">
+
+          <h3>
+            ${foodGroup.emoji}
+            ${foodGroup.name}
+          </h3>
+
+          <span>
+            ${items.length}
+          </span>
+
+        </div>
+
+        <div class="shopping-group-items"></div>
+
+      `;
 
 
-          row.innerHTML = `
-
-            <label>
-
-              <input
-                type="checkbox"
-                ${
-                  item.completed
-                    ? "checked"
-                    : ""
-                }
-              >
-
-              <span
-                class="${
-                  item.completed
-                    ? "completed"
-                    : ""
-                }"
-              >
-
-                ${escapeHtml(
-                  item.name
-                )}
-
-                ${
-                  quantity
-                    ? `<small>
-                        ${escapeHtml(
-                          quantity
-                        )}
-                       </small>`
-                    : ""
-                }
-
-              </span>
-
-            </label>
-
-            <button
-              type="button"
-              aria-label="Remove item"
-            >
-              ×
-            </button>
-
-          `;
+      const itemContainer =
+        group.querySelector(
+          ".shopping-group-items"
+        );
 
 
-          const checkbox =
-            row.querySelector(
-              "input"
-            );
+      items.forEach(item => {
 
-
-          checkbox.addEventListener(
-            "change",
-            () => {
-
-              item.completed =
-                checkbox.checked;
-
-
-              saveShopping();
-
-              renderShopping();
-
-            }
+        const row =
+          createShoppingItem(
+            item
           );
 
 
+        itemContainer.appendChild(
           row
-            .querySelector(
-              "button"
-            )
-            .addEventListener(
-              "click",
-              () => {
+        );
 
-                shopping =
-                  shopping.filter(
-                    current =>
-                      current.id !==
-                      item.id
-                  );
+      });
 
 
-                saveShopping();
-
-                renderShopping();
-
-              }
-            );
-
-
-          list.appendChild(
-            row
-          );
-
-        }
+      container.appendChild(
+        group
       );
 
     }
   );
 
-
-  updateProgress();
-
 }
 
 
-/* =========================
-   MANUAL SHOPPING ITEM
-   ========================= */
-
-function addShoppingItemPrompt() {
-
-  const name =
-    prompt(
-      "What do you need to buy?"
-    );
-
-
-  if (!name) return;
-
-
-  const cleanName =
-    name.trim();
-
-
-  if (!cleanName) return;
-
-
-  shopping.push({
-
-    id:
-      `manual-${Date.now()}`,
-
-    name:
-      cleanName,
-
-    quantity:
-      1,
-
-    unit:
-      "",
-
-    completed:
-      false,
-
-    source:
-      "manual"
-
-  });
-
-
-  saveShopping();
-
-  renderShopping();
-
-}
-
-
-/* =========================
-   QUANTITY DISPLAY
-   ========================= */
-
-function formatQuantity(
+function createShoppingItem(
   item
 ) {
 
-  const quantity =
-    Number(
-      item.quantity
+  const row =
+    document.createElement(
+      "div"
     );
 
 
-  if (
-    !quantity &&
-    !item.unit
-  ) {
-
-    return "";
-
-  }
+  row.className =
+    "shopping-item";
 
 
-  if (
-    quantity === 0
-  ) {
+  if (item.completed) {
 
-    return item.unit || "";
+    row.classList.add(
+      "completed"
+    );
 
   }
 
 
-  return `${quantity}${
-    item.unit
-      ? " " + item.unit
-      : ""
-  }`;
+  row.innerHTML = `
+
+    <label class="shopping-checkbox">
+
+      <input
+        type="checkbox"
+        ${item.completed ? "checked" : ""}
+      >
+
+      <span></span>
+
+    </label>
+
+    <div class="shopping-item-content">
+
+      <strong>
+        ${escapeHtml(item.name)}
+      </strong>
+
+      <span>
+        ${formatQuantity(item.quantity)}
+        ${escapeHtml(item.unit)}
+      </span>
+
+    </div>
+
+    ${
+      item.source === "manual"
+        ? `
+          <button
+            type="button"
+            class="delete-shopping-item"
+            aria-label="Delete item"
+          >
+            ×
+          </button>
+        `
+        : ""
+    }
+
+  `;
+
+
+  const checkbox =
+    row.querySelector(
+      'input[type="checkbox"]'
+    );
+
+
+  checkbox.addEventListener(
+    "change",
+    () => {
+
+      item.completed =
+        checkbox.checked;
+
+
+      saveShopping();
+
+      renderShopping();
+
+    }
+  );
+
+
+  const deleteButton =
+    row.querySelector(
+      ".delete-shopping-item"
+    );
+
+
+  if (deleteButton) {
+
+    deleteButton.addEventListener(
+      "click",
+      () => {
+
+        shopping =
+          shopping.filter(
+            shoppingItem =>
+              shoppingItem !== item
+          );
+
+
+        saveShopping();
+
+        renderShopping();
+
+      }
+    );
+
+  }
+
+
+  return row;
 
 }
 
@@ -1663,7 +1709,27 @@ function formatQuantity(
    SHOPPING PROGRESS
    ========================= */
 
-function updateProgress() {
+function updateShoppingProgress(
+  progressId,
+  textId
+) {
+
+  const progress =
+    document.getElementById(
+      progressId
+    );
+
+
+  const text =
+    document.getElementById(
+      textId
+    );
+
+
+  if (!progress || !text) {
+    return;
+  }
+
 
   const total =
     shopping.length;
@@ -1671,129 +1737,199 @@ function updateProgress() {
 
   const completed =
     shopping.filter(
-      item =>
-        item.completed
+      item => item.completed
     ).length;
 
 
   const percentage =
-    total
-      ? Math.round(
-          (completed /
-            total) *
-            100
-        )
-      : 0;
+    total === 0
+      ? 0
+      : Math.round(
+          (completed / total) * 100
+        );
 
 
-  document
-    .querySelectorAll(
-      "#shopping-progress, #shopping-progress-full"
-    )
-    .forEach(
-      bar => {
-
-        bar.style.width =
-          `${percentage}%`;
-
-      }
-    );
+  progress.style.width =
+    `${percentage}%`;
 
 
-  document
-    .querySelectorAll(
-      "#shopping-progress-text, #shopping-progress-text-full"
-    )
-    .forEach(
-      text => {
-
-        text.textContent =
-          `${completed} of ${total} items completed`;
-
-      }
-    );
+  text.textContent =
+    `${completed} of ${total} items completed`;
 
 }
 
 
 /* =========================
-   NAVIGATION
+   MANUAL SHOPPING MODAL
    ========================= */
 
-function setupNavigation() {
+function addShoppingItemPrompt() {
 
-  const buttons =
-    document.querySelectorAll(
-      ".nav-button"
+  const modal =
+    document.getElementById(
+      "shopping-item-modal"
     );
 
 
-  const sections =
-    document.querySelectorAll(
-      ".page-section"
+  const nameInput =
+    document.getElementById(
+      "shopping-item-name"
     );
 
 
-  buttons.forEach(
-    button => {
-
-      button.addEventListener(
-        "click",
-        () => {
-
-          const target =
-            button.dataset.section;
+  const quantityInput =
+    document.getElementById(
+      "shopping-item-quantity"
+    );
 
 
-          buttons.forEach(
-            item => {
-
-              item.classList.remove(
-                "active"
-              );
-
-            }
-          );
+  const unitSelect =
+    document.getElementById(
+      "shopping-item-unit"
+    );
 
 
-          button.classList.add(
-            "active"
-          );
+  const groupSelect =
+    document.getElementById(
+      "shopping-item-group"
+    );
 
 
-          sections.forEach(
-            section => {
-
-              section.classList.toggle(
-                "hidden",
-                section.id !==
-                  target
-              );
-
-            }
-          );
+  if (!modal) return;
 
 
-          if (
-            target ===
-            "recipes"
-          ) {
+  nameInput.value = "";
 
-            renderMeals();
+  quantityInput.value = "";
 
-          }
+  unitSelect.value = "each";
+
+  groupSelect.value =
+    "fruit-veg";
 
 
-          window.scrollTo({
-            top: 0,
-            behavior: "smooth"
-          });
-
-        }
-      );
-
-    }
+  modal.classList.remove(
+    "hidden"
   );
+
+
+  modal.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+
+  setTimeout(() => {
+    nameInput.focus();
+  }, 50);
+
+}
+
+
+function closeShoppingItemModal() {
+
+  const modal =
+    document.getElementById(
+      "shopping-item-modal"
+    );
+
+
+  if (!modal) return;
+
+
+  modal.classList.add(
+    "hidden"
+  );
+
+
+  modal.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+}
+
+
+function saveShoppingItem() {
+
+  const nameInput =
+    document.getElementById(
+      "shopping-item-name"
+    );
+
+
+  const quantityInput =
+    document.getElementById(
+      "shopping-item-quantity"
+    );
+
+
+  const unitSelect =
+    document.getElementById(
+      "shopping-item-unit"
+    );
+
+
+  const groupSelect =
+    document.getElementById(
+      "shopping-item-group"
+    );
+
+
+  const name =
+    nameInput.value.trim();
+
+
+  if (!name) {
+
+    alert(
+      "Please enter an item."
+    );
+
+    nameInput.focus();
+
+    return;
+  }
+
+
+  const quantity =
+    Number(
+      quantityInput.value
+    );
+
+
+  shopping.push({
+
+    id:
+      `manual-${Date.now()}`,
+
+    name,
+
+    quantity:
+      Number.isFinite(quantity)
+        ? quantity
+        : 1,
+
+    unit:
+      unitSelect.value,
+
+    group:
+      groupSelect.value,
+
+    source:
+      "manual",
+
+    completed:
+      false
+
+  });
+
+
+  saveShopping();
+
+  closeShoppingItemModal();
+
+  renderShopping();
 
 }
 
@@ -1810,10 +1946,7 @@ function setupTheme() {
     );
 
 
-  if (
-    savedTheme ===
-    "dark"
-  ) {
+  if (savedTheme === "dark") {
 
     document.body.classList.add(
       "dark"
@@ -1831,59 +1964,56 @@ function toggleTheme() {
   );
 
 
-  const theme =
+  const isDark =
     document.body.classList.contains(
       "dark"
-    )
-      ? "dark"
-      : "light";
+    );
 
 
   localStorage.setItem(
     "mealmate-theme",
-    theme
+    isDark
+      ? "dark"
+      : "light"
   );
 
 }
 
 
 /* =========================
-   SECURITY HELPERS
+   HELPERS
    ========================= */
+
+function formatQuantity(
+  quantity
+) {
+
+  if (
+    Number.isInteger(quantity)
+  ) {
+
+    return String(quantity);
+
+  }
+
+
+  return Number(
+    quantity
+  ).toFixed(2)
+    .replace(/\.00$/, "")
+    .replace(/(\.\d)0$/, "$1");
+
+}
+
 
 function escapeHtml(
   value
 ) {
 
-  const div =
-    document.createElement(
-      "div"
-    );
-
-
-  div.textContent =
-    value;
-
-
-  return div.innerHTML;
-
-}
-
-
-function escapeAttribute(
-  value
-) {
-
-  return String(
-    value
-  )
+  return String(value)
     .replace(
       /&/g,
       "&amp;"
-    )
-    .replace(
-      /"/g,
-      "&quot;"
     )
     .replace(
       /</g,
@@ -1892,28 +2022,48 @@ function escapeAttribute(
     .replace(
       />/g,
       "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
     );
 
 }
 
 
+function escapeAttribute(
+  value
+) {
+
+  return escapeHtml(
+    value
+  );
+
+}
+
+
 /* =========================
-   START APP
+   KEYBOARD SUPPORT
    ========================= */
 
 document.addEventListener(
-  "DOMContentLoaded",
-  () => {
+  "keydown",
+  event => {
 
-    setupNavigation();
+    if (
+      event.key !== "Escape"
+    ) {
+      return;
+    }
 
-    setupTheme();
 
-    renderPlanner();
+    closeMealModal();
 
-    renderMeals();
-
-    generateShoppingList();
+    closeShoppingItemModal();
 
   }
 );
