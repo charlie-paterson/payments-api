@@ -818,4 +818,21 @@ h1 {
       40px;
   }
 
+  .day-card {
+  cursor: pointer;
+}
+
+.day-card:focus {
+  outline: 3px solid rgba(91, 91, 214, 0.25);
+  outline-offset: 2px;
+}
+
+.empty-day {
+  border-style: dashed;
+}
+
+.empty-day:hover {
+  border-color: var(--primary);
+}
+
 }
