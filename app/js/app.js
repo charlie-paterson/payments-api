@@ -405,7 +405,132 @@ function saveNewMeal() {
 
   closeMealModal();
 
-  renderPlanner();
+  function renderPlanner() {
+
+  const grid =
+    document.querySelector(".week-grid");
+
+  if (!grid) return;
+
+  grid.innerHTML = "";
+
+  days.forEach(day => {
+
+    const mealId =
+      weekPlan[day];
+
+    const meal =
+      meals.find(
+        item => item.id === mealId
+      );
+
+    const card =
+      document.createElement("article");
+
+    card.className = "day-card";
+
+
+    if (!meal) {
+
+      card.classList.add("empty-day");
+
+      card.innerHTML = `
+        <span class="day-name">
+          ${day.substring(0, 3).toUpperCase()}
+        </span>
+
+        <div class="meal-icon">
+          ➕
+        </div>
+
+        <h3>
+          Nothing planned
+        </h3>
+
+        <p>
+          Click to add a meal
+        </p>
+      `;
+
+      card.addEventListener(
+        "click",
+        () => {
+          openMealModal();
+
+          document.querySelector(
+            "#meal-day"
+          ).value = day;
+        }
+      );
+
+    } else {
+
+      card.innerHTML = `
+        <span class="day-name">
+          ${day.substring(0, 3).toUpperCase()}
+        </span>
+
+        <div class="meal-icon">
+          ${meal.emoji}
+        </div>
+
+        <h3>
+          ${escapeHtml(meal.title)}
+        </h3>
+
+        <p>
+          ${meal.ingredients.length}
+          ingredients
+        </p>
+      `;
+
+      card.setAttribute(
+        "role",
+        "button"
+      );
+
+      card.setAttribute(
+        "tabindex",
+        "0"
+      );
+
+      card.setAttribute(
+        "aria-label",
+        `Edit ${meal.title} for ${day}`
+      );
+
+      card.addEventListener(
+        "click",
+        () => {
+          openMealModal(meal.id);
+        }
+      );
+
+      card.addEventListener(
+        "keydown",
+        event => {
+
+          if (
+            event.key === "Enter" ||
+            event.key === " "
+          ) {
+
+            event.preventDefault();
+
+            openMealModal(meal.id);
+          }
+
+        }
+      );
+
+    }
+
+    grid.appendChild(card);
+
+  });
+
+  renderTonight();
+}
 
   renderMeals();
 
