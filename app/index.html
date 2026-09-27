@@ -348,6 +348,131 @@
 
   </main>
 
+  <!-- Meal modal -->
+<div
+  id="meal-modal"
+  class="modal hidden"
+  aria-hidden="true"
+>
+  <div class="modal-backdrop" onclick="closeMealModal()"></div>
+
+  <div class="modal-content">
+
+    <div class="modal-header">
+      <div>
+        <span class="eyebrow">NEW MEAL</span>
+        <h2>Create a meal</h2>
+      </div>
+
+      <button
+        type="button"
+        class="modal-close"
+        onclick="closeMealModal()"
+        aria-label="Close"
+      >
+        ×
+      </button>
+    </div>
+
+
+    <div class="form-group">
+
+      <label for="meal-title">
+        Meal title
+      </label>
+
+      <input
+        id="meal-title"
+        type="text"
+        placeholder="e.g. Chicken Fajitas"
+      >
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label>
+        Ingredients
+      </label>
+
+      <div id="ingredient-list"></div>
+
+
+      <button
+        type="button"
+        class="secondary-button"
+        onclick="addIngredientRow()"
+      >
+        + Add ingredient
+      </button>
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label for="meal-day">
+        Add to day
+      </label>
+
+      <select id="meal-day">
+
+        <option value="Monday">
+          Monday
+        </option>
+
+        <option value="Tuesday">
+          Tuesday
+        </option>
+
+        <option value="Wednesday">
+          Wednesday
+        </option>
+
+        <option value="Thursday">
+          Thursday
+        </option>
+
+        <option value="Friday">
+          Friday
+        </option>
+
+        <option value="Saturday">
+          Saturday
+        </option>
+
+        <option value="Sunday">
+          Sunday
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <div class="modal-actions">
+
+      <button
+        type="button"
+        class="secondary-button"
+        onclick="closeMealModal()"
+      >
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        class="primary-button"
+        onclick="saveNewMeal()"
+      >
+        Save meal
+      </button>
+
+    </div>
+
+  </div>
+</div>
 
   <script src="js/app.js"></script>
 
