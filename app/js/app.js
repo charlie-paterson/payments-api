@@ -967,6 +967,24 @@ function addIngredientRow(
   }
 
 
+  const groupSelect =
+    row.querySelector(
+      ".ingredient-group"
+    );
+
+
+  /*
+   * Explicitly set the selected
+   * group after creating the
+   * select. This makes the
+   * selected value display
+   * correctly in the browser.
+   */
+
+  groupSelect.value =
+    group;
+
+
   row.querySelector(
     ".remove-ingredient"
   ).addEventListener(
@@ -1172,12 +1190,6 @@ function updateExistingMeal(
     ingredients;
 
 
-  /*
-   * Remove this meal from any
-   * existing day before assigning
-   * it to the newly selected day.
-   */
-
   days.forEach(day => {
 
     if (
@@ -1265,12 +1277,6 @@ function generateShoppingList() {
 
   const aggregated = {};
 
-
-  /*
-   * Build ingredients from
-   * meals currently assigned
-   * to the week.
-   */
 
   days.forEach(day => {
 
@@ -1369,24 +1375,12 @@ function generateShoppingList() {
   });
 
 
-  /*
-   * IMPORTANT:
-   * Keep manually added shopping
-   * items before replacing the
-   * generated list.
-   */
-
   const manualItems =
     shopping.filter(
       item =>
         item.source === "manual"
     );
 
-
-  /*
-   * Remember which generated
-   * items were already checked off.
-   */
 
   const previous =
     new Map(
@@ -1632,19 +1626,14 @@ function createShoppingItem(
 
     </div>
 
-    ${
-      item.source === "manual"
-        ? `
-          <button
-            type="button"
-            class="delete-shopping-item"
-            aria-label="Delete item"
-          >
-            ×
-          </button>
-        `
-        : ""
-    }
+    <button
+      type="button"
+      class="delete-shopping-item"
+      aria-label="Delete item"
+      title="Remove item"
+    >
+      ×
+    </button>
 
   `;
 
@@ -1671,33 +1660,35 @@ function createShoppingItem(
   );
 
 
+  /*
+   * Every shopping item,
+   * including meal-generated
+   * items, can now be removed.
+   */
+
   const deleteButton =
     row.querySelector(
       ".delete-shopping-item"
     );
 
 
-  if (deleteButton) {
+  deleteButton.addEventListener(
+    "click",
+    () => {
 
-    deleteButton.addEventListener(
-      "click",
-      () => {
-
-        shopping =
-          shopping.filter(
-            shoppingItem =>
-              shoppingItem !== item
-          );
+      shopping =
+        shopping.filter(
+          shoppingItem =>
+            shoppingItem !== item
+        );
 
 
-        saveShopping();
+      saveShopping();
 
-        renderShopping();
+      renderShopping();
 
-      }
-    );
-
-  }
+    }
+  );
 
 
   return row;
