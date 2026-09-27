@@ -1436,7 +1436,142 @@ document.addEventListener(
 
     renderMeals();
 
-    generateShoppingList();
+    function generateShoppingList() {
+
+  const aggregated = {};
+
+
+  days.forEach(day => {
+
+    const mealId =
+      weekPlan[day];
+
+    if (!mealId) return;
+
+
+    const meal =
+      meals.find(
+        item => item.id === mealId
+      );
+
+    if (!meal) return;
+
+
+    if (
+      !Array.isArray(meal.ingredients)
+    ) {
+      return;
+    }
+
+
+    meal.ingredients.forEach(
+      ingredient => {
+
+        const name =
+          String(
+            ingredient.name || ""
+          ).trim();
+
+        if (!name) return;
+
+
+        const unit =
+          String(
+            ingredient.unit || ""
+          ).trim();
+
+
+        const key =
+          `${name.toLowerCase()}|${unit.toLowerCase()}`;
+
+
+        if (!aggregated[key]) {
+
+          aggregated[key] = {
+            id:
+              `ingredient-${Object.keys(
+                aggregated
+              ).length}`,
+
+            name,
+
+            quantity: 0,
+
+            unit,
+
+            completed: false
+
+          };
+
+        }
+
+
+        const quantity =
+          Number(
+            ingredient.quantity
+          );
+
+
+        if (
+          Number.isFinite(quantity)
+        ) {
+
+          aggregated[key].quantity +=
+            quantity;
+
+        }
+
+      }
+    );
+
+  });
+
+
+  /*
+   * Preserve checkbox state from
+   * the previous shopping list.
+   */
+  const previous =
+    new Map(
+      shopping.map(item => [
+
+        `${String(item.name).toLowerCase()}|${String(
+          item.unit || ""
+        ).toLowerCase()}`,
+
+        item
+
+      ])
+    );
+
+
+  shopping =
+    Object.values(
+      aggregated
+    ).map(item => {
+
+      const oldItem =
+        previous.get(
+          `${item.name.toLowerCase()}|${item.unit.toLowerCase()}`
+        );
+
+
+      return {
+        ...item,
+
+        completed:
+          oldItem
+            ? oldItem.completed
+            : false
+      };
+
+    });
+
+
+  saveShopping();
+
+  renderShopping();
+}
 
   }
 );
