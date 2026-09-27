@@ -2,8 +2,8 @@ replicaCount: 3
 
 image:
   repository: payments-api
-  tag: "1.0.1"
-  pullPolicy: Never
+  tag: "latest"
+  pullPolicy: Always
 
 service:
   type: ClusterIP
