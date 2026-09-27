@@ -4,341 +4,348 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0f172a">
+
   <title>MealMate</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #f8fafc;
-      color: #0f172a;
-    }
-
-    .app {
-      max-width: 1100px;
-      margin: auto;
-      padding: 24px;
-    }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 28px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .logo {
-      width: 46px;
-      height: 46px;
-      display: grid;
-      place-items: center;
-      border-radius: 14px;
-      background: #0f172a;
-      color: white;
-      font-size: 24px;
-    }
-
-    h1, h2, h3, p {
-      margin-top: 0;
-    }
-
-    h1 {
-      margin-bottom: 2px;
-      font-size: 24px;
-    }
-
-    .subtitle {
-      margin: 0;
-      color: #64748b;
-      font-size: 14px;
-    }
-
-    .week {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 10px;
-      margin-bottom: 24px;
-    }
-
-    .day {
-      background: white;
-      border: 1px solid #e2e8f0;
-      border-radius: 16px;
-      padding: 14px;
-      min-height: 130px;
-    }
-
-    .day-name {
-      font-size: 12px;
-      font-weight: 700;
-      color: #64748b;
-      text-transform: uppercase;
-    }
-
-    .meal-icon {
-      font-size: 28px;
-      margin: 18px 0 8px;
-    }
-
-    .meal-name {
-      font-size: 14px;
-      font-weight: 700;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: 1.4fr 1fr;
-      gap: 20px;
-    }
-
-    .card {
-      background: white;
-      border: 1px solid #e2e8f0;
-      border-radius: 20px;
-      padding: 22px;
-      box-shadow: 0 8px 30px rgba(15, 23, 42, 0.04);
-    }
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 18px;
-    }
-
-    .card-header h2 {
-      margin: 0;
-      font-size: 18px;
-    }
-
-    .button {
-      border: 0;
-      background: #0f172a;
-      color: white;
-      border-radius: 10px;
-      padding: 9px 14px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .shopping-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 0;
-      border-bottom: 1px solid #f1f5f9;
-    }
-
-    .shopping-item:last-child {
-      border-bottom: 0;
-    }
-
-    .shopping-item input {
-      width: 18px;
-      height: 18px;
-    }
-
-    .tonight {
-      text-align: center;
-    }
-
-    .tonight-icon {
-      font-size: 64px;
-      margin: 12px 0;
-    }
-
-    .tonight h3 {
-      font-size: 22px;
-      margin-bottom: 6px;
-    }
-
-    .meta {
-      color: #64748b;
-      font-size: 14px;
-      margin-bottom: 18px;
-    }
-
-    .progress {
-      height: 8px;
-      background: #e2e8f0;
-      border-radius: 99px;
-      overflow: hidden;
-      margin-top: 18px;
-    }
-
-    .progress-bar {
-      width: 65%;
-      height: 100%;
-      background: #0f172a;
-    }
-
-    @media (max-width: 800px) {
-      .app {
-        padding: 16px;
-      }
-
-      .week {
-        display: flex;
-        overflow-x: auto;
-        padding-bottom: 8px;
-      }
-
-      .day {
-        min-width: 120px;
-      }
-
-      .grid {
-        grid-template-columns: 1fr;
-      }
-
-      header {
-        align-items: flex-start;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
   <main class="app">
 
-    <header>
-      <div class="brand">
-        <div class="logo">🍴</div>
-        <div>
-          <h1>MealMate</h1>
-          <p class="subtitle">Plan less. Eat better.</p>
+    <!-- Header -->
+    <header class="app-header">
+      <div>
+        <div class="brand">
+          <span class="brand-icon">🍴</span>
+
+          <div>
+            <h1>MealMate</h1>
+            <p>Plan less. Eat better.</p>
+          </div>
         </div>
       </div>
 
-      <button class="button">+ Add meal</button>
+      <button
+        class="theme-button"
+        type="button"
+        onclick="toggleTheme()"
+        aria-label="Toggle dark mode"
+      >
+        🌙
+      </button>
     </header>
 
-    <section>
-      <h2>This week</h2>
 
-      <div class="week">
+    <!-- Navigation -->
+    <nav class="navigation">
 
-        <div class="day">
-          <div class="day-name">Mon</div>
+      <button class="nav-button active" data-section="planner">
+        📅
+        <span>Planner</span>
+      </button>
+
+      <button class="nav-button" data-section="recipes">
+        🍳
+        <span>Recipes</span>
+      </button>
+
+      <button class="nav-button" data-section="shopping">
+        🛒
+        <span>Shopping</span>
+      </button>
+
+    </nav>
+
+
+    <!-- Planner -->
+    <section id="planner" class="page-section">
+
+      <div class="section-heading">
+        <div>
+          <h2>This week</h2>
+          <p>What's cooking?</p>
+        </div>
+
+        <button class="primary-button" type="button">
+          + Add meal
+        </button>
+      </div>
+
+
+      <div class="week-grid">
+
+        <article class="day-card">
+          <span class="day-name">MON</span>
           <div class="meal-icon">🍝</div>
-          <div class="meal-name">Pasta</div>
-        </div>
+          <h3>Pasta</h3>
+          <p>Tomato & basil</p>
+        </article>
 
-        <div class="day">
-          <div class="day-name">Tue</div>
+        <article class="day-card">
+          <span class="day-name">TUE</span>
           <div class="meal-icon">🍛</div>
-          <div class="meal-name">Chicken Curry</div>
-        </div>
+          <h3>Chicken Curry</h3>
+          <p>35 min · Easy</p>
+        </article>
 
-        <div class="day">
-          <div class="day-name">Wed</div>
+        <article class="day-card">
+          <span class="day-name">WED</span>
           <div class="meal-icon">🌮</div>
-          <div class="meal-name">Tacos</div>
-        </div>
+          <h3>Tacos</h3>
+          <p>25 min · Easy</p>
+        </article>
 
-        <div class="day">
-          <div class="day-name">Thu</div>
+        <article class="day-card">
+          <span class="day-name">THU</span>
           <div class="meal-icon">🥘</div>
-          <div class="meal-name">Stir Fry</div>
-        </div>
+          <h3>Stir Fry</h3>
+          <p>20 min · Easy</p>
+        </article>
 
-        <div class="day">
-          <div class="day-name">Fri</div>
+        <article class="day-card">
+          <span class="day-name">FRI</span>
           <div class="meal-icon">🍕</div>
-          <div class="meal-name">Pizza</div>
-        </div>
+          <h3>Pizza</h3>
+          <p>30 min · Medium</p>
+        </article>
 
-        <div class="day">
-          <div class="day-name">Sat</div>
+        <article class="day-card">
+          <span class="day-name">SAT</span>
           <div class="meal-icon">🍔</div>
-          <div class="meal-name">Burgers</div>
-        </div>
+          <h3>Burgers</h3>
+          <p>25 min · Easy</p>
+        </article>
 
-        <div class="day">
-          <div class="day-name">Sun</div>
+        <article class="day-card">
+          <span class="day-name">SUN</span>
           <div class="meal-icon">🍗</div>
-          <div class="meal-name">Roast Dinner</div>
-        </div>
+          <h3>Roast Dinner</h3>
+          <p>90 min · Medium</p>
+        </article>
 
       </div>
+
+
+      <!-- Tonight -->
+      <div class="dashboard-grid">
+
+        <article class="card tonight-card">
+
+          <div class="card-title">
+            <div>
+              <span class="eyebrow">TONIGHT</span>
+              <h2>Chicken Curry</h2>
+            </div>
+
+            <span class="big-food">🍛</span>
+          </div>
+
+          <p class="muted">
+            A quick and comforting curry for tonight.
+          </p>
+
+          <div class="recipe-meta">
+            <span>⏱ 35 min</span>
+            <span>⭐ Easy</span>
+            <span>🔥 520 kcal</span>
+          </div>
+
+          <button class="primary-button">
+            View recipe
+          </button>
+
+        </article>
+
+
+        <!-- Shopping preview -->
+        <article class="card">
+
+          <div class="card-title">
+
+            <div>
+              <span class="eyebrow">SHOPPING</span>
+              <h2>Your list</h2>
+            </div>
+
+            <span class="big-food">🛒</span>
+
+          </div>
+
+          <div id="shopping-list"></div>
+
+          <div class="progress-container">
+            <div
+              id="shopping-progress"
+              class="progress-bar"
+              style="width: 0%"
+            ></div>
+          </div>
+
+          <p
+            id="shopping-progress-text"
+            class="muted"
+          >
+            0 of 0 items completed
+          </p>
+
+        </article>
+
+      </div>
+
     </section>
 
-    <div class="grid">
 
-      <section class="card">
-        <div class="card-header">
-          <h2>🛒 Shopping list</h2>
-          <button class="button">+ Add</button>
+    <!-- Recipes -->
+    <section
+      id="recipes"
+      class="page-section hidden"
+    >
+
+      <div class="section-heading">
+
+        <div>
+          <h2>Recipe library</h2>
+          <p>Find something delicious.</p>
         </div>
 
-        <label class="shopping-item">
-          <input type="checkbox">
-          Chicken breast
-        </label>
-
-        <label class="shopping-item">
-          <input type="checkbox">
-          Rice
-        </label>
-
-        <label class="shopping-item">
-          <input type="checkbox">
-          Peppers
-        </label>
-
-        <label class="shopping-item">
-          <input type="checkbox">
-          Onions
-        </label>
-
-        <label class="shopping-item">
-          <input type="checkbox">
-          Pasta
-        </label>
-
-        <div class="progress">
-          <div class="progress-bar"></div>
-        </div>
-
-        <p class="subtitle" style="margin-top: 8px;">
-          2 of 5 items completed
-        </p>
-      </section>
-
-      <section class="card tonight">
-
-        <div class="card-header">
-          <h2>🍳 Tonight</h2>
-        </div>
-
-        <div class="tonight-icon">🍛</div>
-
-        <h3>Chicken Curry</h3>
-
-        <p class="meta">
-          ⏱ 35 minutes · Easy
-        </p>
-
-        <button class="button">
-          View recipe
+        <button class="primary-button">
+          + New recipe
         </button>
 
-      </section>
+      </div>
 
-    </div>
+
+      <div class="recipe-grid">
+
+        <article class="recipe-card">
+          <div class="recipe-image">🍛</div>
+
+          <div class="recipe-content">
+            <h3>Chicken Curry</h3>
+
+            <p>
+              Creamy tomato curry with rice.
+            </p>
+
+            <div class="recipe-meta">
+              <span>35 min</span>
+              <span>Easy</span>
+            </div>
+          </div>
+        </article>
+
+
+        <article class="recipe-card">
+          <div class="recipe-image">🌮</div>
+
+          <div class="recipe-content">
+            <h3>Chicken Tacos</h3>
+
+            <p>
+              Spicy chicken, salsa and avocado.
+            </p>
+
+            <div class="recipe-meta">
+              <span>25 min</span>
+              <span>Easy</span>
+            </div>
+          </div>
+        </article>
+
+
+        <article class="recipe-card">
+          <div class="recipe-image">🍝</div>
+
+          <div class="recipe-content">
+            <h3>Tomato Pasta</h3>
+
+            <p>
+              Simple pasta with fresh basil.
+            </p>
+
+            <div class="recipe-meta">
+              <span>20 min</span>
+              <span>Easy</span>
+            </div>
+          </div>
+        </article>
+
+
+        <article class="recipe-card">
+          <div class="recipe-image">🥘</div>
+
+          <div class="recipe-content">
+            <h3>Vegetable Stir Fry</h3>
+
+            <p>
+              Crispy vegetables with noodles.
+            </p>
+
+            <div class="recipe-meta">
+              <span>20 min</span>
+              <span>Easy</span>
+            </div>
+          </div>
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- Shopping -->
+    <section
+      id="shopping"
+      class="page-section hidden"
+    >
+
+      <div class="section-heading">
+
+        <div>
+          <h2>Shopping list</h2>
+          <p>Everything you need this week.</p>
+        </div>
+
+        <button
+          class="primary-button"
+          type="button"
+          onclick="addShoppingItemPrompt()"
+        >
+          + Add item
+        </button>
+
+      </div>
+
+
+      <div class="card shopping-card">
+
+        <div id="shopping-list-full"></div>
+
+        <div class="progress-container">
+          <div
+            id="shopping-progress-full"
+            class="progress-bar"
+            style="width: 0%"
+          ></div>
+        </div>
+
+        <p
+          id="shopping-progress-text-full"
+          class="muted"
+        >
+          0 of 0 items completed
+        </p>
+
+      </div>
+
+    </section>
 
   </main>
+
+
+  <script src="js/app.js"></script>
 
 </body>
 </html>
