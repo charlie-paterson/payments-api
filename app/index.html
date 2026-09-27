@@ -74,61 +74,12 @@
           onclick="openMealModal()"
         >
           + Add meal
-        </button>  
+        </button>
       </div>
 
 
       <div class="week-grid">
-
-        <article class="day-card">
-          <span class="day-name">MON</span>
-          <div class="meal-icon">🍝</div>
-          <h3>Pasta</h3>
-          <p>Tomato & basil</p>
-        </article>
-
-        <article class="day-card">
-          <span class="day-name">TUE</span>
-          <div class="meal-icon">🍛</div>
-          <h3>Chicken Curry</h3>
-          <p>35 min · Easy</p>
-        </article>
-
-        <article class="day-card">
-          <span class="day-name">WED</span>
-          <div class="meal-icon">🌮</div>
-          <h3>Tacos</h3>
-          <p>25 min · Easy</p>
-        </article>
-
-        <article class="day-card">
-          <span class="day-name">THU</span>
-          <div class="meal-icon">🥘</div>
-          <h3>Stir Fry</h3>
-          <p>20 min · Easy</p>
-        </article>
-
-        <article class="day-card">
-          <span class="day-name">FRI</span>
-          <div class="meal-icon">🍕</div>
-          <h3>Pizza</h3>
-          <p>30 min · Medium</p>
-        </article>
-
-        <article class="day-card">
-          <span class="day-name">SAT</span>
-          <div class="meal-icon">🍔</div>
-          <h3>Burgers</h3>
-          <p>25 min · Easy</p>
-        </article>
-
-        <article class="day-card">
-          <span class="day-name">SUN</span>
-          <div class="meal-icon">🍗</div>
-          <h3>Roast Dinner</h3>
-          <p>90 min · Medium</p>
-        </article>
-
+        <!-- JS renders days -->
       </div>
 
 
@@ -201,7 +152,7 @@
     </section>
 
 
-    <!-- Recipes -->
+    <!-- Recipes / Meals -->
     <section
       id="recipes"
       class="page-section hidden"
@@ -214,86 +165,19 @@
           <p>Find something delicious.</p>
         </div>
 
-        <button class="primary-button">
-          + New recipe
+        <button
+          class="primary-button"
+          type="button"
+          onclick="openMealModal()"
+        >
+          + New meal
         </button>
 
       </div>
 
 
       <div class="recipe-grid">
-
-        <article class="recipe-card">
-          <div class="recipe-image">🍛</div>
-
-          <div class="recipe-content">
-            <h3>Chicken Curry</h3>
-
-            <p>
-              Creamy tomato curry with rice.
-            </p>
-
-            <div class="recipe-meta">
-              <span>35 min</span>
-              <span>Easy</span>
-            </div>
-          </div>
-        </article>
-
-
-        <article class="recipe-card">
-          <div class="recipe-image">🌮</div>
-
-          <div class="recipe-content">
-            <h3>Chicken Tacos</h3>
-
-            <p>
-              Spicy chicken, salsa and avocado.
-            </p>
-
-            <div class="recipe-meta">
-              <span>25 min</span>
-              <span>Easy</span>
-            </div>
-          </div>
-        </article>
-
-
-        <article class="recipe-card">
-          <div class="recipe-image">🍝</div>
-
-          <div class="recipe-content">
-            <h3>Tomato Pasta</h3>
-
-            <p>
-              Simple pasta with fresh basil.
-            </p>
-
-            <div class="recipe-meta">
-              <span>20 min</span>
-              <span>Easy</span>
-            </div>
-          </div>
-        </article>
-
-
-        <article class="recipe-card">
-          <div class="recipe-image">🥘</div>
-
-          <div class="recipe-content">
-            <h3>Vegetable Stir Fry</h3>
-
-            <p>
-              Crispy vegetables with noodles.
-            </p>
-
-            <div class="recipe-meta">
-              <span>20 min</span>
-              <span>Easy</span>
-            </div>
-          </div>
-        </article>
-
+        <!-- JS renders meals -->
       </div>
 
     </section>
@@ -348,131 +232,329 @@
 
   </main>
 
-  <!-- Meal modal -->
-<div
-  id="meal-modal"
-  class="modal hidden"
-  aria-hidden="true"
->
-  <div class="modal-backdrop" onclick="closeMealModal()"></div>
 
-  <div class="modal-content">
+  <!-- =========================
+       MEAL MODAL
+       ========================= -->
 
-    <div class="modal-header">
-      <div>
-        <span class="eyebrow">NEW MEAL</span>
-        <h2>Create a meal</h2>
+  <div
+    id="meal-modal"
+    class="modal hidden"
+    aria-hidden="true"
+  >
+
+    <div
+      class="modal-backdrop"
+      onclick="closeMealModal()"
+    ></div>
+
+
+    <div class="modal-content">
+
+      <div class="modal-header">
+
+        <div>
+          <span class="eyebrow">NEW MEAL</span>
+          <h2>Create a meal</h2>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          onclick="closeMealModal()"
+          aria-label="Close"
+        >
+          ×
+        </button>
+
       </div>
 
-      <button
-        type="button"
-        class="modal-close"
-        onclick="closeMealModal()"
-        aria-label="Close"
-      >
-        ×
-      </button>
-    </div>
+
+      <!-- Meal title -->
+      <div class="form-group">
+
+        <label for="meal-title">
+          Meal title
+        </label>
+
+        <input
+          id="meal-title"
+          type="text"
+          placeholder="e.g. Chicken Fajitas"
+        >
+
+      </div>
 
 
-    <div class="form-group">
+      <!-- Ingredients -->
+      <div class="form-group">
 
-      <label for="meal-title">
-        Meal title
-      </label>
+        <label>
+          Ingredients
+        </label>
 
-      <input
-        id="meal-title"
-        type="text"
-        placeholder="e.g. Chicken Fajitas"
-      >
-
-    </div>
+        <div id="ingredient-list"></div>
 
 
-    <div class="form-group">
+        <button
+          type="button"
+          class="secondary-button"
+          onclick="addIngredientRow()"
+        >
+          + Add ingredient
+        </button>
 
-      <label>
-        Ingredients
-      </label>
-
-      <div id="ingredient-list"></div>
-
-
-      <button
-        type="button"
-        class="secondary-button"
-        onclick="addIngredientRow()"
-      >
-        + Add ingredient
-      </button>
-
-    </div>
+      </div>
 
 
-    <div class="form-group">
+      <!-- Day -->
+      <div class="form-group">
 
-      <label for="meal-day">
-        Add to day
-      </label>
+        <label for="meal-day">
+          Add to day
+        </label>
 
-      <select id="meal-day">
+        <select id="meal-day">
 
-        <option value="Monday">
-          Monday
-        </option>
+          <option value="Monday">
+            Monday
+          </option>
 
-        <option value="Tuesday">
-          Tuesday
-        </option>
+          <option value="Tuesday">
+            Tuesday
+          </option>
 
-        <option value="Wednesday">
-          Wednesday
-        </option>
+          <option value="Wednesday">
+            Wednesday
+          </option>
 
-        <option value="Thursday">
-          Thursday
-        </option>
+          <option value="Thursday">
+            Thursday
+          </option>
 
-        <option value="Friday">
-          Friday
-        </option>
+          <option value="Friday">
+            Friday
+          </option>
 
-        <option value="Saturday">
-          Saturday
-        </option>
+          <option value="Saturday">
+            Saturday
+          </option>
 
-        <option value="Sunday">
-          Sunday
-        </option>
+          <option value="Sunday">
+            Sunday
+          </option>
 
-      </select>
+        </select>
 
-    </div>
+      </div>
 
 
-    <div class="modal-actions">
+      <!-- Actions -->
+      <div class="modal-actions">
 
-      <button
-        type="button"
-        class="secondary-button"
-        onclick="closeMealModal()"
-      >
-        Cancel
-      </button>
+        <button
+          type="button"
+          class="secondary-button"
+          onclick="closeMealModal()"
+        >
+          Cancel
+        </button>
 
-      <button
-        type="button"
-        class="primary-button"
-        onclick="saveNewMeal()"
-      >
-        Save meal
-      </button>
+        <button
+          type="button"
+          class="primary-button"
+          onclick="saveNewMeal()"
+        >
+          Save meal
+        </button>
+
+      </div>
 
     </div>
 
   </div>
-</div>
+
+
+  <!-- =========================
+       SHOPPING ITEM MODAL
+       ========================= -->
+
+  <div
+    id="shopping-item-modal"
+    class="modal hidden"
+    aria-hidden="true"
+  >
+
+    <div
+      class="modal-backdrop"
+      onclick="closeShoppingItemModal()"
+    ></div>
+
+
+    <div class="modal-content">
+
+      <div class="modal-header">
+
+        <div>
+          <span class="eyebrow">SHOPPING</span>
+          <h2>Add shopping item</h2>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          onclick="closeShoppingItemModal()"
+          aria-label="Close"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <!-- Item name -->
+      <div class="form-group">
+
+        <label for="shopping-item-name">
+          Item
+        </label>
+
+        <input
+          id="shopping-item-name"
+          type="text"
+          placeholder="e.g. Bananas"
+        >
+
+      </div>
+
+
+      <!-- Quantity -->
+      <div class="form-group">
+
+        <label for="shopping-item-quantity">
+          Quantity
+        </label>
+
+        <input
+          id="shopping-item-quantity"
+          type="number"
+          min="0"
+          step="any"
+          placeholder="e.g. 6"
+        >
+
+      </div>
+
+
+      <!-- Unit -->
+      <div class="form-group">
+
+        <label for="shopping-item-unit">
+          Unit
+        </label>
+
+        <select id="shopping-item-unit">
+
+          <option value="each">
+            Each
+          </option>
+
+          <option value="g">
+            Grams (g)
+          </option>
+
+          <option value="kg">
+            Kilograms (kg)
+          </option>
+
+          <option value="ml">
+            Millilitres (ml)
+          </option>
+
+          <option value="l">
+            Litres (l)
+          </option>
+
+          <option value="pack">
+            Pack
+          </option>
+
+          <option value="tin">
+            Tin
+          </option>
+
+          <option value="bottle">
+            Bottle
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- Food group -->
+      <div class="form-group">
+
+        <label for="shopping-item-group">
+          Food group
+        </label>
+
+        <select id="shopping-item-group">
+
+          <option value="protein">
+            🥩 Protein
+          </option>
+
+          <option value="carbs">
+            🍞 Carbs
+          </option>
+
+          <option value="dairy">
+            🥛 Dairy
+          </option>
+
+          <option value="fruit-veg">
+            🍎 Fruit & Veg
+          </option>
+
+          <option value="drinks">
+            🥤 Drinks
+          </option>
+
+          <option value="snacks">
+            🍿 Snacks
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- Actions -->
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="secondary-button"
+          onclick="closeShoppingItemModal()"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          class="primary-button"
+          onclick="saveShoppingItem()"
+        >
+          Add item
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
 
   <script src="js/app.js"></script>
 
